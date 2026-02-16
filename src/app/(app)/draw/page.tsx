@@ -51,6 +51,7 @@ export default function DrawPage() {
   const [restyleLoading, setRestyleLoading] = useState(false);
   const [restyleResult, setRestyleResult] = useState("");
   const [restyleError, setRestyleError] = useState("");
+  const [inputKey, setInputKey] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   async function handleGenerate() {
@@ -243,6 +244,7 @@ export default function DrawPage() {
         <div className="space-y-4">
           {/* Upload area */}
           <input
+            key={inputKey}
             ref={fileInputRef}
             type="file"
             accept="image/*"
@@ -276,7 +278,8 @@ export default function DrawPage() {
                     setUploadPreview("");
                     setUploadBase64("");
                     setRestyleResult("");
-                    if (fileInputRef.current) fileInputRef.current.value = "";
+                    setRestyleError("");
+                    setInputKey((k) => k + 1);
                   }}
                   className="absolute top-2 right-2 rounded-full bg-black/50 px-2.5 py-1 text-xs text-white hover:bg-black/70"
                 >
