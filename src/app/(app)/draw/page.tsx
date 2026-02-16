@@ -87,15 +87,29 @@ export default function DrawPage() {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base64 = reader.result as string;
-      setUploadPreview(base64);
-      setUploadBase64(base64);
+    // Compress image to fit Vercel's 4.5MB body limit
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 1536;
+      let w = img.width;
+      let h = img.height;
+      if (w > MAX || h > MAX) {
+        const ratio = Math.min(MAX / w, MAX / h);
+        w = Math.round(w * ratio);
+        h = Math.round(h * ratio);
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(img, 0, 0, w, h);
+      const compressed = canvas.toDataURL("image/jpeg", 0.85);
+      setUploadPreview(compressed);
+      setUploadBase64(compressed);
       setRestyleResult("");
       setRestyleError("");
     };
-    reader.readAsDataURL(file);
+    img.src = URL.createObjectURL(file);
   }
 
   async function handleRestyle() {
