@@ -13,12 +13,12 @@ export default function HomePage() {
   const [gallery, setGallery] = useState<GalleryItem[]>([]);
 
   useEffect(() => {
-    setGallery(getGallery());
+    getGallery().then(setGallery);
   }, []);
 
-  function handleRemove(id: string) {
-    removeFromGallery(id);
-    setGallery(getGallery());
+  async function handleRemove(id: string) {
+    await removeFromGallery(id);
+    setGallery(await getGallery());
   }
 
   return (

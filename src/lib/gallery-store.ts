@@ -1,3 +1,5 @@
+import { supabase } from "./supabase";
+
 export interface GalleryItem {
   id: string;
   type: "draw" | "restyle" | "ppt";
@@ -7,31 +9,66 @@ export interface GalleryItem {
   createdAt: string;
 }
 
-const STORAGE_KEY = "xinqing-gallery";
+interface GalleryRow {
+  id: string;
+  type: string;
+  image_url: string;
+  prompt: string;
+  style: string;
+  created_at: string;
+}
 
-export function getGallery(): GalleryItem[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
+function rowToItem(row: GalleryRow): GalleryItem {
+  return {
+    id: row.id,
+    type: row.type as GalleryItem["type"],
+    imageUrl: row.image_url,
+    prompt: row.prompt,
+    style: row.style,
+    createdAt: row.created_at,
+  };
+}
+
+export async function getGallery(): Promise<GalleryItem[]> {
+  const { data, error } = await supabase
+    .from("gallery")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("getGallery error:", error);
     return [];
   }
+
+  return (data as GalleryRow[]).map(rowToItem);
 }
 
-export function addToGallery(item: Omit<GalleryItem, "id" | "createdAt">) {
-  const gallery = getGallery();
-  const newItem: GalleryItem = {
-    ...item,
-    id: crypto.randomUUID(),
-    createdAt: new Date().toISOString(),
-  };
-  gallery.unshift(newItem);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(gallery));
-  return newItem;
+export async function addToGallery(
+  item: Omit<GalleryItem, "id" | "createdAt">
+): Promise<GalleryItem | null> {
+  const { data, error } = await supabase
+    .from("gallery")
+    .insert({
+      type: item.type,
+      image_url: item.imageUrl,
+      prompt: item.prompt,
+      style: item.style,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error("addToGallery error:", error);
+    return null;
+  }
+
+  return rowToItem(data as GalleryRow);
 }
 
-export function removeFromGallery(id: string) {
-  const gallery = getGallery().filter((item) => item.id !== id);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(gallery));
+export async function removeFromGallery(id: string): Promise<void> {
+  const { error } = await supabase.from("gallery").delete().eq("id", id);
+
+  if (error) {
+    console.error("removeFromGallery error:", error);
+  }
 }

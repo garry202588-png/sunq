@@ -70,7 +70,7 @@ export default function DrawPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "生成失败");
       setImageUrl(data.imageUrl);
-      addToGallery({ type: "draw", imageUrl: data.imageUrl, prompt, style });
+      await addToGallery({ type: "draw", imageUrl: data.imageUrl, prompt, style });
     } catch (err) {
       setError(err instanceof Error ? err.message : "生成失败");
     } finally {
@@ -131,7 +131,7 @@ export default function DrawPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "转绘失败");
       setRestyleResult(data.imageUrl);
-      addToGallery({ type: "restyle", imageUrl: data.imageUrl, prompt: "风格转绘", style: restyleStyle });
+      await addToGallery({ type: "restyle", imageUrl: data.imageUrl, prompt: "风格转绘", style: restyleStyle });
     } catch (err) {
       setRestyleError(err instanceof Error ? err.message : "转绘失败");
     } finally {

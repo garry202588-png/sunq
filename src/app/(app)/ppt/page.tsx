@@ -213,7 +213,7 @@ export default function PPTPage() {
       setProgressText("完成！");
       setResult(data);
       if (data.embedUrl || data.viewUrl) {
-        addToGallery({
+        await addToGallery({
           type: "ppt",
           imageUrl: data.embedUrl || data.viewUrl,
           prompt: answers.topic,
