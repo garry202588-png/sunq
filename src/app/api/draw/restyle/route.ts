@@ -32,9 +32,6 @@ export async function POST(request: NextRequest) {
 
   const stylePrompt = STYLE_PROMPTS[style] || STYLE_PROMPTS["水彩"];
 
-  // Strip data URL prefix (data:image/...;base64,) — DashScope expects raw base64
-  const rawBase64 = imageBase64.replace(/^data:image\/[^;]+;base64,/, "");
-
   try {
     // Submit i2i task (async mode) with base64 image
     const submitRes = await fetch(I2I_URL, {
@@ -48,7 +45,7 @@ export async function POST(request: NextRequest) {
         model: "wan2.5-i2i-preview",
         input: {
           prompt: stylePrompt,
-          images: [rawBase64],
+          images: [imageBase64],
         },
         parameters: {
           n: 1,
